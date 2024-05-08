@@ -35,7 +35,7 @@ export const App = ( elementId ) => {
 
   //Listeners
   newDescriptionInput.addEventListener('keydown', ( event ) => {
-    if( event.code == "Enter" ){
+    if( event.keyCode == 13 ){
       if( event.target.value.trim().length <= 2 ) return
       todoStore.addTodo( event.target.value )
       renderTodos()
