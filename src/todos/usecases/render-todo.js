@@ -1,4 +1,5 @@
 import todoStore from "../../store/todo.store";
+import { renderPending } from "./render-pending";
 import { todoHTML } from "./todoHTML";
 
 let element;
@@ -16,4 +17,10 @@ export const renderTodos = ( elementId ) => {
   todos.forEach( todo => {
       element.append( todoHTML( todo ) )
     })
+
+  const updatePendingCount = () => {
+    renderPending( '#pending-count' )
+  }
+  
+  updatePendingCount()
 }
