@@ -1,91 +1,91 @@
-import html from './app.html?raw'
-import todoStore, { Filters } from '../store/todo.store'
-import { renderPending, renderTodos } from './usecases'
+import html from './app.html?raw';
+import todoStore, { Filters } from '../store/todo.store';
+import { renderPending, renderTodos } from './usecases';
 
 const elementIds = {
   TodoList: '.todo-list',
   TodoInput: '#new-todo-input',
-  Toggle: '.toggle',
   ClearCompleted: '.clear-completed',
   TodoFilters: '.filtro',
   PendingCount: '#pending-count',
-}
+};
 
+export const App = (elementId) => {
+  const displayTodos = () => {
+    const todos = todoStore.getTodos(todoStore.getCurrentFilter());
+    renderTodos(elementIds.TodoList, todos);
+    updatePendingCount();
+  };
 
-export const App = ( elementId ) => {
-  
-  
-  
-  
-  (()=> {
+  const updatePendingCount = () => {
+    renderPending(elementIds.PendingCount);
+  };
+
+  // When the function App is called
+  (() => {
     const app = document.createElement('div');
     app.innerHTML = html;
-    document.querySelector( elementId ).append( app );
-    renderTodos( elementIds.TodoList )
+    document.querySelector(elementId).append(app);
+    displayTodos();
   })();
-  
-  //Referencias HTML
-  const newDescriptionInput = document.querySelector( elementIds.TodoInput )
-  const todoList = document.querySelector( elementIds.TodoList )
-  const buttonClearCompleted = document.querySelector( elementIds.ClearCompleted )
-  const filtersUl = document.querySelectorAll( elementIds.TodoFilters );
-  const pendingCount = document.querySelector( elementIds.PendingCount )
 
-  console.log(filtersUl)
+  // HTML References
+  const newDescriptionInput = document.querySelector(elementIds.TodoInput);
+  const todoListUL = document.querySelector(elementIds.TodoList);
+  const clearCompletedButton = document.querySelector(
+    elementIds.ClearCompleted
+  );
+  const filtersLIs = document.querySelectorAll(elementIds.TodoFilters);
 
-  //Listeners
-  newDescriptionInput.addEventListener('keydown', ( event ) => {
-    if( event.keyCode == 13 ){
-      if( event.target.value.trim().length <= 2 ) return
-      todoStore.addTodo( event.target.value )
-      renderTodos()
-      event.target.value = '';
-    }  
-  })
+  // Listeners
+  newDescriptionInput.addEventListener('keyup', (event) => {
+    if (event.key !== 'Enter') return;
+    if (event.target.value.trim().length === 0) return;
 
-  todoList.addEventListener('click', (event) => {
-    if( event.target.classList.contains('toggle') ) {
-      todoStore.toggleTodo( event.target.closest('[data-id]').getAttribute('data-id') )
-      renderTodos()
+    todoStore.addTodo(event.target.value);
+    displayTodos();
+    event.target.value = '';
+  });
+
+  todoListUL.addEventListener('click', (event) => {
+    const element = event.target.closest('[data-id]');
+    if (!element) return;
+
+    const todoId = element.getAttribute('data-id');
+
+    if (event.target.matches('.toggle')) {
+      todoStore.toggleTodo(todoId);
+    } else if (event.target.matches('.destroy')) {
+      todoStore.deleteTodo(todoId);
+    } else {
+      return;
     }
-  })
-  
-  todoList.addEventListener('click', (event) => {
-    if( event.target.classList.contains('destroy') ){
-      todoStore.deleteTodo( event.target.closest('[data-id]').getAttribute('data-id') )
-      renderTodos()
-    }
-  })
 
-  buttonClearCompleted.addEventListener('click', () => {
-    todoStore.deleteCompleted()
-    renderTodos()
-  })
-  
-  filtersUl.forEach( element => {
-    element.addEventListener('click', ( element ) => {
-      filtersUl.forEach( el => el.classList.remove('selected'))
-      element.target.classList.add('selected')
+    displayTodos();
+  });
 
-      switch( element.target.text ){
+  clearCompletedButton.addEventListener('click', () => {
+    todoStore.deleteCompleted();
+    displayTodos();
+  });
+
+  filtersLIs.forEach((element) => {
+    element.addEventListener('click', (event) => {
+      filtersLIs.forEach((el) => el.classList.remove('selected'));
+      event.target.classList.add('selected');
+
+      switch (event.target.text) {
         case 'Todos':
-          todoStore.setSelectedFilter( Filters.All )
-        break;
+          todoStore.setSelectedFilter(Filters.All);
+          break;
         case 'Pendientes':
-          todoStore.setSelectedFilter( Filters.Pending )
-        break;
+          todoStore.setSelectedFilter(Filters.Pending);
+          break;
         case 'Completados':
-          todoStore.setSelectedFilter( Filters.Completed )
-        break;
+          todoStore.setSelectedFilter(Filters.Completed);
+          break;
       }
-        renderTodos()
-    })
-  })
-
-
-
-
-
-
-
-}
+      displayTodos();
+    });
+  });
+};

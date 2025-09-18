@@ -16,18 +16,20 @@ const state = {
 }
 
 const initStore = () => {
-  loadStore()
-  console.log('InitStore')
-}
+  const storedState = loadStore();
+  if (storedState) {
+    const { todos = [], filter = Filters.All } = storedState;
+    state.todos = todos;
+    state.filter = filter;
+  }
+};
 
 const loadStore = () => {
-  if( localStorage.getItem('state') ){
-
-    const { todos = [], filter = Filters.All } = JSON.parse( localStorage.getItem('state'))
-    state.todos = todos;
-    state.filter = filter
+  if (localStorage.getItem('state')) {
+    return JSON.parse(localStorage.getItem('state'));
   }
-}
+  return undefined;
+};
 
 const saveStateToLocalStorage = () => {
   localStorage.setItem('state', JSON.stringify(state) )
